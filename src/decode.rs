@@ -671,7 +671,7 @@ trait ToUnsignedVarint: Sized
 impl<T: Default + TryFrom<u64>> FromUnsignedVarint for T
 where
     T::Error: Debug,
-{
+{  
     fn from_unsigned_varint(data: &mut &[u8]) -> Option<Self>
     {
         let mut result = 0u64;
@@ -683,7 +683,7 @@ where
 
             let b = data[idx];
             let value = (b & 0x7f) as u64;
-            result += value << (idx * 7);
+            result += value.unbounded_shl((idx * 7) as u32);
 
             idx += 1;
             if b & 0x80 == 0 {
@@ -736,7 +736,7 @@ where
     fn from_signed_varint(data: &mut &[u8]) -> Option<Self>
     {
         u64::from_unsigned_varint(data).map(|u| {
-            let signed: i64 = unsafe { std::mem::transmute(u) };
+            let signed: i64 = u64::cast_signed(u);
             signed.try_into().unwrap()
         })
     }
@@ -748,7 +748,7 @@ where
 {
     fn into_signed_varint(self) -> BytesMut
     {
-        let v: u64 = unsafe { std::mem::transmute(self.try_into().unwrap()) };
+        let v: u64 = i64::cast_unsigned(self.try_into().unwrap());
         v.into_unsigned_varint()
     }
 }

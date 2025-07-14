@@ -48,6 +48,8 @@
 //! ```
 #![warn(missing_docs)]
 #![allow(clippy::match_bool)]
+#![allow(bindings_with_variant_name)]
+
 
 pub mod context;
 pub mod decode;
